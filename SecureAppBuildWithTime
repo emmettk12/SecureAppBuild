@@ -1,0 +1,155 @@
+import requests
+import tkinter as tk
+from tkinter import *
+import os
+import time
+import calendar
+from datetime import datetime
+import json
+root = tk.Tk()
+# The width and hight of the GUI
+HEIGHT = 700
+WIDTH = 1100
+
+
+#THis function gives the information on how a specfic person is feeling/mood
+#Depending on how that person is feeling depends on the bible verse they
+#will recieve.
+
+
+def howDoYouFeel(entry):
+    label = tk.Label(lower_frame, text = "")
+
+    if entry.lower() == "bad":
+        x = "Philippians"
+        y = 4
+        z = 13
+        l = 13
+    elif entry.lower() == "horrible":
+        x = "Deuteronomy"
+        y = 31
+        z = 6
+        l = 6
+    elif entry.lower() == "tragic":
+        x = "2 Corinthians"
+        y = 12
+        z = 9
+        l = 9
+    elif entry.lower() == "ok":
+        x = "Psalms"
+        y = 30
+        z = 11
+        l = 11
+    elif entry.lower() == "bearable":
+        x = "John"
+        y = 14
+        z = 27
+        l = 27
+    elif entry.lower() == "good":
+        x = "John"
+        y = 16
+        z = 24
+        l = 24
+    elif entry.lower() =="great":
+        x = "1 Corinthians"
+        y = 16
+        z = 14
+        l = 14
+    elif entry.lower() == "amazing":
+        x = "Matthew"
+        y = 19
+        z = 26
+        l = 26
+    elif entry.lower() == "fantastic":
+        x = "Hebrews"
+        y = 12
+        z = 1
+        l = 1
+    else:
+        x = "That is not an option. Try agian!"
+        label['text'] = x
+        label.place(relwidth=1,relheight=1)
+        return
+        print(x)
+
+
+    label = tk.Label(lower_frame, text = getBibleVerse(x,y,z,l))
+    label.place(relwidth=1,relheight=1)
+
+
+
+#This is where the bible app API is located. In this function, my code connects
+#to the bible apps code and retrives differnt bible verses. THis is also were it takes
+# in the mood information and inputs it into the api
+
+def getBibleVerse(x, y, z, l):
+    # This tells me this function is working
+    #print("x: {0} | y: {1} | z: {2} | l: {3}".format(x, y, z, l))
+
+    url = "https://ajith-holy-bible.p.rapidapi.com/GetVerses"
+
+    querystring = {"Book":x,"chapter":y ,"VerseFrom":z,"VerseTo":l }
+    #This is how the api works. It pull the specific chapter and verser and book
+    #querystring = {"Book":"Luke","chapter":"1","VerseFrom":"5","VerseTo":"8"}
+
+    headers = {
+        'x-rapidapi-key': "e3c506be54mshb7eea1bf5f71208p12fcabjsn81c3e414d8ba",
+        'x-rapidapi-host': "ajith-holy-bible.p.rapidapi.com"
+     }
+
+    response = requests.request("GET", url, headers=headers, params=querystring)
+    returnedInfo= response.text
+    #print(returnedInfo)
+    parsed = json.loads(returnedInfo)
+    actualVerse = parsed["Output"]
+    #print(actualVerse)
+    return(actualVerse)
+
+
+def clock():
+    hour = time.strftime("%H")
+    minute = time.strftime("%M")
+    second = time.strftime("%S")
+
+    my_label.config(text=hour + ":" + minute + ":" + second)
+    my_label.after(1000,clock)
+    
+def update():
+    my_label.config(text="New Text")
+
+my_label = Label(root, text="",font=("Helvetica", 48),fg="green",bg="black")
+my_label.pack(pady=20)
+
+clock()
+
+
+# Tells how big and wide the canvas is
+canvas = tk.Canvas(root, height=HEIGHT, width=WIDTH)
+canvas.pack()
+
+#This is the background image for the gui. It is stored locally so there for
+#it only needs the path to this folder
+background_image = tk.PhotoImage(file='./lighthouse.png')
+background_label = tk.Label(root, image=background_image)
+background_label.place(relwidth=1, relheight=1)
+
+#The frame is where the differnt colors come in that border the text, button, or entry box
+frame = tk.Frame(root, bg="green", bd=5)
+frame.place(relx=0.5, rely=0.1, relwidth=0.75, relheight=0.1, anchor='n')
+
+#The entry box is where the user types in specific data on how they feel
+entry = tk.Entry(frame, font=70)
+entry.place(relwidth=0.65, relheight=1)
+
+
+#The button starts the code and finds bible verse depending on how a specific person
+#is feeling
+button = tk.Button(frame, text="Get Bible Verse", font=30, command=lambda:howDoYouFeel(entry.get()))
+button.place(relx=0.7, relheight=1, relwidth=0.3)
+
+#The lower from is where the bible verse will populate
+lower_frame = tk.Frame(root, bg="green", bd=10)
+lower_frame.place(relx=0.5, rely=0.25, relwidth=0.75, relheight=0.6, anchor='n')
+
+
+root.mainloop()
